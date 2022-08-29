@@ -1,6 +1,10 @@
 # Importing packages
+import os
+
 from tkinter import *
-# from tkinter import messagebox
+from tkinter.simpledialog import askstring
+from tkinter import messagebox
+from pytube import YouTube
 
 
 class YoutubeDownloader(Frame):
@@ -15,6 +19,35 @@ class YoutubeDownloader(Frame):
     # Functionality of the program
     def downloadLink(self, option):
         print(self.link.get(), option)
+        yt = YouTube(self.link.get())
+        
+        # audio option validation
+        if (option == 0):
+            video = yt.streams.filter(only_audio=True).first()
+        
+        if (option == 1):
+            video = yt.streams.first()
+
+        destination = askstring('Save file', 'Enter the destination for save (leave blank for current directory)')
+
+        if (destination == ""):
+            destination = '.'
+
+        out_file = video.download(output_path=destination)
+        base, ext = os.path.splitext(out_file)
+
+        if (option == 0):
+            new_file = base + '.mp3'
+        
+        if (option == 1):
+            new_file = base + '.mp4'
+
+        os.rename(out_file, new_file)
+        self.link.delete(0, END)
+
+        messagebox.showinfo("Complete download", yt.title + " has been successfully downloaded")
+
+
 
     # Creation the graphic interface
     def createWidgets(self):
