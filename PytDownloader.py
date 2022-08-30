@@ -26,7 +26,7 @@ class YoutubeDownloader(Frame):
             video = yt.streams.filter(only_audio=True).first()
         
         if (option == 1):
-            video = yt.streams.first()
+            video = yt.streams.filter(res="720p").first()
 
         destination = askstring('Save file', 'Enter the destination for save (leave blank for current directory)')
 
