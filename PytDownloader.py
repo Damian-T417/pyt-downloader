@@ -2,6 +2,7 @@
 
 # Importing packages
 import os
+import moviepy.editor as mp
 
 from tkinter import *
 from tkinter import messagebox
@@ -27,41 +28,52 @@ class YoutubeDownloader(Tk):
 
     # Functionality of the program
     def downloadLink(self, option):
-        # Debuging
-        # print(self.link.get(), option)
         try:
             yt = YouTube(self.link.get())
-        except(Exception):
-            return messagebox.showerror("Syntax error", "The link is not supported or is misspelled")
+        except Exception:
+            return messagebox.showerror(
+                "Syntax error",
+                "The link is not supported or is misspelled"
+                )
 
-        # audio option validation
-        if (option == 0):
-            video = yt.streams.filter(only_audio=True).first()
-        
-        if (option == 1):
-            video = yt.streams.filter(res="720p").first()
+        file = yt.streams.filter(res="720p").first()
 
-        # Error 'Label' object is not callable (why?)
-        # destination = askstring('Save file', 'Enter the destination for save (leave blank for current directory)')
+        if (file is None):
+            file = yt.streams.first()
 
-        # For the moment the destination will save in the current directory until the v0.2
-        destination = ""
+        '''
+        For the moment the destination will save in the current directory
+
+        Error 'Label' object is not callable (why?)
+        destination = askstring(
+            'Save file',
+            'Enter the destination for save (leave blank for current directory)'
+            )
+
+        #destination = "."
         if (destination == ""):
             destination = '.'
+        out_file = file.download(output_path=destination)
+        '''
 
-        out_file = video.download(output_path=destination)
+        out_file = file.download()
         base, ext = os.path.splitext(out_file)
 
         if (option == 0):
-            new_file = base + '.mp3'
-        
+            new_file = mp.VideoFileClip(out_file)
+            new_file.audio.write_audiofile(base + '.mp3')
+            new_file.close()
+            os.remove(out_file)
+
         if (option == 1):
             new_file = base + '.mp4'
+            os.rename(out_file, new_file)
 
-        os.rename(out_file, new_file)
         self.link.delete(0, 'end')
 
-        messagebox.showinfo("Complete download", yt.title + " has been successfully downloaded")
+        messagebox.showinfo(
+            "Success", 
+            "The" + yt.title + " has been successfully downloaded")
 
     # Creation the graphic interface
     def createWidgets(self):
@@ -81,6 +93,7 @@ class YoutubeDownloader(Tk):
 
         self.download = Button(self, height=2, text="Download", command=lambda: self.downloadLink(option_download.get()))
         self.download.grid(row=4, column=0, columnspan=2, rowspan=6, padx=10, pady=5, sticky=S+N+E+W)
+
 
 root = YoutubeDownloader()
 root.mainloop()
