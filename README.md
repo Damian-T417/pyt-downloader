@@ -11,13 +11,13 @@ tkinter for UI.
 <br>
 
 ## How to use
-- Open the file with a command prompt with this code `python PytDownloader.py`.
+- Open the file with a command prompt with this code `python pyt-downloader.py`.
 - Put the link of your video or audio in the text field.
 - Select the format that download (if press video button, they will download in 720p quality if exist).
 - Finally press download button and the program start to download the video.
 
 ## In this version
-- PytDownloader hasn't executable, only can run with you have python (for now) and the file PytDownloader.py (`python pytDownloader.py`).
+- PytDownloader hasn't executable, only can run with you have python (for now) and the file PytDownloader.py (`python pyt-downloader.py`).
 - Only download your video or audio in the current directory because a bug that will solve in the v0.2 version.
 - PytDownloader can download videos in 720p and if you wish only audio.
 
