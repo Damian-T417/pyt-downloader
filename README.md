@@ -6,8 +6,8 @@
 And thats all for this version, now with the core finished, i work for the next version and possibly the final **version**.
 
 # PytDownloader v0.1 functions summary
-PytDownloader is a GUI for downloading videos of Youtube, using Pytube library as functionality and
-tkinter for UI.
+*What is PytDownloader?* 
+Is a GUI for downloading videos of Youtube, using Pytube library as functionality and tkinter for UI.
 <br>
 
 ## How to use

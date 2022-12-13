@@ -1,8 +1,5 @@
-
 # Importing packages
-import os
 import tkinter as tk
-import moviepy.editor as mp
 
 from tkinter import ttk
 from tkinter import S, N, E, W
@@ -28,7 +25,7 @@ class Pytdownloader(tk.Tk):
         self.grid_columnconfigure(2, weight=1)
 
         self.file_title = tk.StringVar()
-        self.file_title.set("File name")
+        self.file_title.set("")
 
         self.create_widgets()
         self.create_table()
@@ -43,21 +40,27 @@ class Pytdownloader(tk.Tk):
                 "The link is not supported or misspelled"
             )
 
-        if option == 0:
-            streams = yt.streams.filter(only_audio=True)
-        elif option == 1:
-            streams = yt.streams.filter(only_video=True)
-
         self.file_title.set(yt.title)
         self.table.delete(*self.table.get_children())
-        self.link.delete(0, 'end')
+        self.download['state'] = "active"
 
-        for file in streams:
-            self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+        if option == 0:
+            stream = yt.streams.filter(type="audio", mime_type="audio/mp4").first()
+            self.table.insert("",END,text=stream.itag, values=("audio/mp3", stream.resolution, stream.codecs))
+        elif option == 1:
+            streams = yt.streams.filter(type="video", mime_type="video/mp4", progressive=True).order_by("resolution").desc()
+            for file in streams:
+                self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
 
-    def download_file(self, selected):
+
+    def save_file(self, link, selected, option):
         itag = self.table.item(selected, 'text')
-        print("Downloading: ", itag)
+        save = Savefile(self, link, itag, option)
+        save.grab_set()
+
+    def clean_query(self):
+        self.link.delete(0, 'end')
+        self.table.delete(*self.table.get_children())
 
     # Creation the graphic interface
     def create_widgets(self):
@@ -73,17 +76,17 @@ class Pytdownloader(tk.Tk):
 
         # Options
         self.audio = tk.Radiobutton(self, text="Audio", variable=option_download, value=0)
-        self.audio.grid(row=1, column=0)
+        self.audio.grid(row=1, column=0, sticky=E)
 
         self.video = tk.Radiobutton(self, text="Video", variable=option_download, value=1)
-        self.video.grid(row=1, column=1)
+        self.video.grid(row=1, column=1, sticky=N)
 
         # Title
-        self.title = tk.Label(self, font=8, pady=10, textvariable=self.file_title)
-        self.title.grid(row=2, column=0, columnspan=3)
+        self.ftitle = tk.Label(self, font=8, pady=10, textvariable=self.file_title)
+        self.ftitle.grid(row=2, column=0, columnspan=4, padx=10, sticky=S)
 
         #Download button
-        self.download = tk.Button(self, text="Download", command=lambda:self.download_file(self.table.focus()))
+        self.download = tk.Button(self, text="Download", state="disabled", command=lambda:self.save_file(self.link.get(), self.table.focus(), option_download.get()))
         self.download.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky=W+E)
 
     def create_table(self):
