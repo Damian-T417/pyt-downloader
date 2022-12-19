@@ -2,6 +2,7 @@
 # https://www.youtube.com/watch?v=lwYBVbFVqxg&t=562s
 # Importing packages
 import os
+import time
 import tkinter as tk
 import moviepy.editor as mp
 
@@ -9,7 +10,6 @@ from pytube import YouTube
 from tkinter import S, N, E, W
 from tkinter import messagebox
 from tkinter import filedialog
-
 
 class Savefile(tk.Toplevel):
 
@@ -19,6 +19,7 @@ class Savefile(tk.Toplevel):
         self.link = link
         self.itag = itag
         self.option = option
+        self.parent = parent
 
         # Get the file
         try:
@@ -36,12 +37,12 @@ class Savefile(tk.Toplevel):
         self.file_title.set(self.yt.title)
 
         # Configuring the window and grid
+        self.title("Save File")
         self.geometry("400x115")
+        self.resizable(False, False)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=4)
 
-        self.title("Save File")
-        self.resizable(False, False)
         self.create_widgets()
 
     def select_dir(self):
@@ -57,36 +58,56 @@ class Savefile(tk.Toplevel):
         file_type = self.file.mime_type
         mtype = file_type.split('/')
 
+        audio_video = self.yt.streams.filter(progressive=True).get_highest_resolution()
+
         # Audio
-        if (self.option == 0):
-            file_audio = self.yt.streams.filter(progressive=True).get_highest_resolution()
-            out_file = file_audio.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
-
-            if(mtype[1] == "mp4"):
-                mtype[1] = "mp3"
-
+        if self.option == 0:
+            out_file = audio_video.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
             base, ext = os.path.splitext(out_file)
+            mtype[1] = "mp3"
 
             new_file = mp.VideoFileClip(out_file)
             new_file.audio.write_audiofile(base +"."+ mtype[1])
+
             new_file.close()
             os.remove(out_file)
 
         # Video
-        if (self.option == 1):
+        if self.option == 1:
             out_file = self.file.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
 
-            # Only if i add the advanced options
-            # base, ext = os.path.splitext(out_file)
-            # new_file = base + mtype[1]
-            # os.rename(out_file, new_file)
+            # Advanced search
+            if self.file.is_progressive == False and self.file.mime_type == "video/mp4":
+                confirm = messagebox.askokcancel(
+                    "Confirm dialog",
+                    "This video does not contain audio, the program can add the audio in the video but there may be a possibility that it is not added well, continue?"
+                )
+                if confirm == True:
+                    base, ext = os.path.splitext(out_file)
+
+                    # Generate audio
+                    audio_file = audio_video.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
+                    mp.VideoFileClip(audio_file).audio.write_audiofile(base + ".mp3")
+
+                    #Fix video
+                    new_file = mp.VideoFileClip(out_file)
+                    audio = mp.AudioFileClip(base + ".mp3")
+
+                    new_audio = mp.CompositeAudioClip([audio])
+                    new_file.audio = new_audio
+                    new_file.write_videofile(base+"."+mtype[1])
+                    time.sleep(1)
+
+                    new_file.close()
+                    os.remove(base + ".mp3")
 
         messagebox.showinfo(
             "Success",
             self.file_title.get() + " has been successfully downloaded"
         )
-        return self.destroy()
 
+        self.parent.clean_query()
+        self.destroy()
 
     # Creation the graphic interface
     def create_widgets(self):
