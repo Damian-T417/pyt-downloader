@@ -3,6 +3,7 @@
 # Importing packages
 import os
 import time
+import shutil
 import tkinter as tk
 import moviepy.editor as mp
 
@@ -54,52 +55,58 @@ class Savefile(tk.Toplevel):
         print(self.link)
         print("Downloading: ", self.itag, self.file_title.get(), " in ", self.location.get(), " with option ", self.option)
 
-        # Get the ext
-        file_type = self.file.mime_type
-        mtype = file_type.split('/')
-
+        # Get a audio for other options
         audio_video = self.yt.streams.filter(progressive=True).get_highest_resolution()
 
-        # Audio
+        # Audio option
         if self.option == 0:
-            out_file = audio_video.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
+            out_file = audio_video.download(filename=self.file_title.get()+".mp4",output_path=self.location.get())
             base, ext = os.path.splitext(out_file)
-            mtype[1] = "mp3"
 
             new_file = mp.VideoFileClip(out_file)
-            new_file.audio.write_audiofile(base +"."+ mtype[1])
+            new_file.audio.write_audiofile(base + ".mp3")
 
             new_file.close()
             os.remove(out_file)
 
-        # Video
+        # Video option
         if self.option == 1:
-            out_file = self.file.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
+            out_file = self.file.download(filename=self.file_title.get()+".mp4",output_path=self.location.get())
 
-            # Advanced search
-            if self.file.is_progressive == False and self.file.mime_type == "video/mp4":
-                confirm = messagebox.askokcancel(
-                    "Confirm dialog",
-                    "This video does not contain audio, the program can add the audio in the video but there may be a possibility that it is not added well, continue?"
-                )
-                if confirm == True:
-                    base, ext = os.path.splitext(out_file)
+        # Advanced search
+        if self.file.is_progressive == False and self.file.mime_type == "video/mp4":
+            confirm = messagebox.askokcancel(
+                "Alert",
+                "This video doesn't contain audio, the program can add the audio in the video "+
+                "but the process take a long moment to complete depending of the quality of the " +
+                "video and the duration. In adition the program will take a some resouces of your computer " +
+                "for the process. Continue?"
+            )
+            if confirm == True:
+                base, ext = os.path.splitext(out_file)
 
-                    # Generate audio
-                    audio_file = audio_video.download(filename=self.file_title.get()+"."+mtype[1],output_path=self.location.get())
-                    mp.VideoFileClip(audio_file).audio.write_audiofile(base + ".mp3")
+                # Generate audio
+                audio_file = audio_video.download(filename="audio_file.mp4")
+                mp.VideoFileClip(audio_file).audio.write_audiofile("audio_file.mp3")
+                os.remove(audio_file)
 
-                    #Fix video
-                    new_file = mp.VideoFileClip(out_file)
-                    audio = mp.AudioFileClip(base + ".mp3")
+                #Fix video
+                new_video = mp.VideoFileClip(out_file)
+                audio = mp.AudioFileClip('audio_file.mp3')
 
-                    new_audio = mp.CompositeAudioClip([audio])
-                    new_file.audio = new_audio
-                    new_file.write_videofile(base+"."+mtype[1])
-                    time.sleep(1)
+                new_audio = mp.CompositeAudioClip([audio])
+                new_video.audio = new_audio
+                new_video.write_videofile(self.file_title.get() + '.mp4')
+                time.sleep(1)
 
-                    new_file.close()
-                    os.remove(base + ".mp3")
+                new_video.close()
+                audio.close()
+                os.remove(out_file)
+                os.remove('audio_file.mp3')
+                shutil.move(self.file_title.get() + '.mp4', self.location.get())
+            else:
+                os.remove(out_file)
+                return self.destroy()
 
         messagebox.showinfo(
             "Success",
@@ -107,7 +114,7 @@ class Savefile(tk.Toplevel):
         )
 
         self.parent.clean_query()
-        self.destroy()
+        return self.destroy()
 
     # Creation the graphic interface
     def create_widgets(self):

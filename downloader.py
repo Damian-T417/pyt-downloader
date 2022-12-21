@@ -76,8 +76,9 @@ class Pytdownloader(tk.Tk):
 
         if option == 1:
             confirm = messagebox.askokcancel(
-                "Warning",
-                "Do you what to search more videos in diferent codecs? (Some videos can't work on diferent devices or not have audio)"
+                "Alert",
+                "Do you what to search more videos in diferent codecs?" +
+                " (Some videos can't work on diferent devices or not have audio)"
             )
             if confirm is True:
                 self.file_title.set(yt.title)
