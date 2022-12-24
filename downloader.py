@@ -17,7 +17,7 @@ class Pytdownloader(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         # Configuring the window and grid
-        self.title("Youtube Downloader")
+        self.title("Pyt-downloader")
         self.geometry("500x415")
         self.resizable(False, False)
         self.grid_columnconfigure(0, weight=1)
@@ -77,7 +77,7 @@ class Pytdownloader(tk.Tk):
         if option == 1:
             confirm = messagebox.askokcancel(
                 "Alert",
-                "Do you what to search more videos in diferent codecs?" +
+                "Do you what to search more videos in diferent codecs and resolutions?" +
                 " (Some videos can't work on diferent devices or not have audio)"
             )
             if confirm is True:
@@ -95,6 +95,7 @@ class Pytdownloader(tk.Tk):
         save.grab_set()
 
     def clean_query(self):
+        self.file_title.set("")
         self.link.delete(0, 'end')
         self.table.delete(*self.table.get_children())
         self.download['state'] = "disabled"

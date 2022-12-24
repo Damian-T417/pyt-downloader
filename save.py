@@ -3,12 +3,13 @@
 # Importing packages
 import os
 import time
+import json
 import shutil
 import tkinter as tk
 import moviepy.editor as mp
 
 from pytube import YouTube
-from tkinter import S, N, E, W
+from tkinter import N, E, W
 from tkinter import messagebox
 from tkinter import filedialog
 
@@ -37,6 +38,11 @@ class Savefile(tk.Toplevel):
         self.location = tk.StringVar()
         self.file_title.set(self.yt.title)
 
+        # Get json data
+        with open('data.json', 'r') as f:
+            self.data = json.load(f)
+            self.location.set(self.data['file_location'])
+
         # Configuring the window and grid
         self.title("Save File")
         self.geometry("400x115")
@@ -48,6 +54,13 @@ class Savefile(tk.Toplevel):
 
     def select_dir(self):
         dir_path = filedialog.askdirectory(title="Select a folder")
+        with open('data.json', 'r') as f:
+            self.data = json.load(f)
+
+        self.data['file_location'] = dir_path
+
+        with open('data.json', 'w') as f:
+            json.dump(self.data, f, indent=4, sort_keys=True)
         self.location.set(dir_path)
 
     def download_file(self):
