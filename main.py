@@ -22,7 +22,7 @@ if __name__ == "__main__":
             "Welcome!",
             "Welcome to Pyt-downloader, put a youtube link in the first entry and push"+
             " search to find your audio/video in diferent quality and download, "+
-            "and if you need more options, try in advanced search to more."
+            "try in advanced search to more if you need a more options."
         )
         data['show_welcome'] = 0
         with open('data.json', 'w') as f:

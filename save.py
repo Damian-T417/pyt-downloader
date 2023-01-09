@@ -1,5 +1,4 @@
 # links de prueba: https://www.youtube.com/watch?v=IwzFzUXSE5s
-# https://www.youtube.com/watch?v=lwYBVbFVqxg&t=562s
 # Importing packages
 import os
 import time
@@ -28,10 +27,11 @@ class Savefile(tk.Toplevel):
             self.yt = YouTube(link)
             self.file = self.yt.streams.get_by_itag(itag)
         except Exception:
-            return messagebox.showerror(
+            messagebox.showerror(
                 "Error",
                 "The program have a unexpected error"
                 )
+            return self.destroy()
 
         # Set Variables
         self.file_title = tk.StringVar()
@@ -51,23 +51,24 @@ class Savefile(tk.Toplevel):
         self.grid_columnconfigure(1, weight=4)
 
         self.create_widgets()
+        self.grab_set()
+        self.focus_set()
 
     def select_dir(self):
+        # Ask for a new path
         dir_path = filedialog.askdirectory(title="Select a folder")
-        with open('data.json', 'r') as f:
-            self.data = json.load(f)
+        if dir_path == "":
+            return
 
-        self.data['file_location'] = dir_path
-
+        # Set the new location in the json file
         with open('data.json', 'w') as f:
+            self.data['file_location'] = dir_path
             json.dump(self.data, f, indent=4, sort_keys=True)
-        self.location.set(dir_path)
+
+        # Set the location in the input
+        return self.location.set(dir_path)
 
     def download_file(self):
-        # Debugging
-        print(self.link)
-        print("Downloading: ", self.itag, self.file_title.get(), " in ", self.location.get(), " with option ", self.option)
-
         # Get a audio for other options
         audio_video = self.yt.streams.filter(progressive=True).get_highest_resolution()
 
@@ -90,9 +91,9 @@ class Savefile(tk.Toplevel):
         if self.file.is_progressive == False and self.file.mime_type == "video/mp4":
             confirm = messagebox.askokcancel(
                 "Alert",
-                "This video doesn't contain audio, the program can add the audio in the video "+
+                "This video doesn't contain audio, PytDownloader can add the audio in the video "+
                 "but the process take a long moment to complete depending of the quality of the " +
-                "video and the duration. In adition the program will take a some resouces of your computer " +
+                "video and the duration. This process will take a some resouces of your computer " +
                 "for the process. Continue?"
             )
             if confirm == True:

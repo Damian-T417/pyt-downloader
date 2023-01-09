@@ -11,7 +11,6 @@ from save import Savefile
 
 
 class Pytdownloader(tk.Tk):
-
     # Window Constructor
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -25,17 +24,20 @@ class Pytdownloader(tk.Tk):
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(1, weight=2)
 
+        # Set global variables
         self.file_title = tk.StringVar()
         self.file_title.set("")
 
         self.option_download = tk.IntVar()
         self.option_download.set(2)
 
+        # Set a event when return or enter ir clicked
+        self.bind("<Return>", self.on_return_click)
+
         self.create_widgets()
         self.create_table()
 
     def get_files(self, link, option):
-
         try:
             yt = YouTube(link)
         except Exception:
@@ -57,7 +59,6 @@ class Pytdownloader(tk.Tk):
                 self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
 
     def get_advanced_files(self, link, option):
-
         try:
             yt = YouTube(link)
         except Exception:
@@ -91,21 +92,17 @@ class Pytdownloader(tk.Tk):
 
     def save_file(self, link, selected, option):
         itag = self.table.item(selected, 'text')
-        save = Savefile(self, link, itag, option)
-        save.grab_set()
-
-    def clean_query(self):
-        self.file_title.set("")
-        self.link.delete(0, 'end')
-        self.table.delete(*self.table.get_children())
-        self.download['state'] = "disabled"
+        Savefile(self, link, itag, option)
 
     # Creation the graphic interface
     def create_widgets(self):
-
         # Search bar
         self.link = tk.Entry(self)
         self.link.grid(row=0, column=0, pady=10, padx=10, columnspan=3, sticky=W+E)
+        self.link.insert(0, "Enter your link")
+        self.link['state'] = "disabled"
+        self.link.bind("<Button-1>", self.on_link_click)
+        self.link.bind("<FocusOut>", self.on_link_focus_out)
 
         self.search = tk.Button(self, width=14, text="Search", command=lambda: self.get_files(self.link.get(), self.option_download.get()))
         self.search.grid(row=0, column=3, pady=10, padx=10, sticky=W)
@@ -129,7 +126,6 @@ class Pytdownloader(tk.Tk):
         self.download.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky=W+E)
 
     def create_table(self):
-
         # Table
         table_scroll = ttk.Scrollbar(self)
         table_scroll.grid(row=3, column=3, sticky=N+S+W)
@@ -151,3 +147,23 @@ class Pytdownloader(tk.Tk):
         self.table.heading("Codec", text="Codec", anchor=CENTER)
 
         self.table.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky=E+W+N+S)
+
+# Events
+    def clean_query(self):
+        self.file_title.set("")
+        self.link.delete(0, 'end')
+        self.table.delete(*self.table.get_children())
+        self.download['state'] = "disabled"
+
+    def on_link_click(self, event):
+        self.link['state'] = "normal"
+        if self.link.get() == "Enter your link":
+            self.link.delete(0, END)
+
+    def on_link_focus_out(self, event):
+        if self.link.get() == "":
+            self.link.insert(0, "Enter your link")
+        self.link['state'] = "disabled"
+
+    def on_return_click(self, event):
+        self.get_files(self.link.get(), self.option_download.get())
