@@ -65,6 +65,7 @@ class Pytdownloader(tk.Tk):
 
         try:
             self.file_title.set(yt.title)
+            self.file_link.set(link)
             self.table.delete(*self.table.get_children())
             self.download['state'] = "active"
 
@@ -123,6 +124,7 @@ class Pytdownloader(tk.Tk):
             )
             if confirm is True:
                 try:
+                    self.file_link.set(link)
                     self.file_title.set(yt.title)
                     self.table.delete(*self.table.get_children())
                     self.download['state'] = "active"
@@ -140,6 +142,11 @@ class Pytdownloader(tk.Tk):
         return self.on_function_finish()
 
     def save_file(self, link, selected, option):
+        if selected == "":
+            return self.on_function_finish(
+                "Table info",
+                "Select an option from the table"
+            )
         itag = self.table.item(selected, 'text')
         Savefile(self, link, itag, option)
 
@@ -173,7 +180,7 @@ class Pytdownloader(tk.Tk):
         self.ftitle.grid(row=2, column=0, columnspan=4, padx=10, sticky=S)
 
         #Download button
-        self.download = tk.Button(self, text="Download", state="disabled", command=lambda:self.save_file(self.link.get(), self.table.focus(), self.option_download.get()))
+        self.download = tk.Button(self, text="Download", state="disabled", command=lambda:self.save_file(self.file_link.get(), self.table.focus(), self.option_download.get()))
         self.download.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky=W+E)
 
     def create_table(self):
@@ -199,7 +206,6 @@ class Pytdownloader(tk.Tk):
 
         self.table.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky=E+W+N+S)
 
-# Events
     def clean_query(self):
         self.file_title.set("")
         self.link.delete(0, 'end')
@@ -220,6 +226,7 @@ class Pytdownloader(tk.Tk):
                 message
             )
 
+# Events
     def on_link_click(self, event):
         self.link['state'] = "normal"
         if self.link.get() == "Enter your link":
