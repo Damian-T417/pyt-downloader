@@ -22,6 +22,13 @@ class Savefile(tk.Toplevel):
         self.option = option
         self.parent = parent
 
+        # Configuring the window and grid
+        self.title("Save File")
+        self.geometry("400x115")
+        self.resizable(False, False)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=4)
+
         # Get the file
         try:
             self.yt = YouTube(link)
@@ -42,13 +49,6 @@ class Savefile(tk.Toplevel):
         with open('data.json', 'r') as f:
             self.data = json.load(f)
             self.location.set(self.data['file_location'])
-
-        # Configuring the window and grid
-        self.title("Save File")
-        self.geometry("400x115")
-        self.resizable(False, False)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=4)
 
         self.create_widgets()
         self.grab_set()

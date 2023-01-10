@@ -28,6 +28,9 @@ class Pytdownloader(tk.Tk):
         self.file_title = tk.StringVar()
         self.file_title.set("")
 
+        self.file_link = tk.StringVar()
+        self.file_link.set("")
+
         self.option_download = tk.IntVar()
         self.option_download.set(2)
 
@@ -38,33 +41,70 @@ class Pytdownloader(tk.Tk):
         self.create_table()
 
     def get_files(self, link, option):
-        try:
-            yt = YouTube(link)
-        except Exception:
-            return messagebox.showerror(
-                "Syntax error",
-                "The link is not supported or misspelled"
+        # Validations
+        if self.link.get() == "" or self.link.get() == "Enter your link":
+            return self.on_function_finish(
+                "Syntax info",
+                "Enter the link into the search bar",
             )
 
-        self.file_title.set(yt.title)
-        self.table.delete(*self.table.get_children())
-        self.download['state'] = "active"
-
-        if option == 0:
-            stream = yt.streams.filter(type="audio", mime_type="audio/mp4").first()
-            self.table.insert("",END,text=stream.itag, values=("audio/mp3", stream.resolution, stream.codecs))
-        elif option == 1:
-            streams = yt.streams.filter(type="video", progressive=True).order_by("resolution").desc()
-            for file in streams:
-                self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
-
-    def get_advanced_files(self, link, option):
         try:
             yt = YouTube(link)
         except Exception:
-            return messagebox.showerror(
+            return self.on_function_finish(
                 "Syntax error",
-                "The link is not supported or misspelled"
+                "The link is not supported or is misspelled",
+                True
+            )
+
+        if self.option_download.get() == 2:
+            return self.on_function_finish(
+                "Option info",
+                "Select one of the options below the search bar",
+            )
+
+        try:
+            self.file_title.set(yt.title)
+            self.table.delete(*self.table.get_children())
+            self.download['state'] = "active"
+
+            if option == 0:
+                stream = yt.streams.filter(type="audio", mime_type="audio/mp4").first()
+                self.table.insert("",END,text=stream.itag, values=("audio/mp3", stream.resolution, stream.codecs))
+            elif option == 1:
+                streams = yt.streams.filter(type="video", progressive=True).order_by("resolution").desc()
+                for file in streams:
+                    self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+        except Exception:
+            return self.on_function_finish(
+                "Error",
+                "The program have a unexpected error",
+                True
+                )
+
+        return self.on_function_finish()
+
+    def get_advanced_files(self, link, option):
+        # Validations
+        if self.link.get() == "" or self.link.get() == "Enter your link":
+            return self.on_function_finish(
+                "Syntax info",
+                "Enter the link into the search bar",
+            )
+
+        try:
+            yt = YouTube(link)
+        except Exception:
+            return self.on_function_finish(
+                "Syntax error",
+                "The link is not supported or is misspelled",
+                True
+            )
+
+        if self.option_download.get() == 2:
+            return self.on_function_finish(
+                "Option info",
+                "Select one of the options below the search bar",
             )
 
         if option == 0:
@@ -82,13 +122,22 @@ class Pytdownloader(tk.Tk):
                 " (Some videos can't work on diferent devices or not have audio)"
             )
             if confirm is True:
-                self.file_title.set(yt.title)
-                self.table.delete(*self.table.get_children())
-                self.download['state'] = "active"
+                try:
+                    self.file_title.set(yt.title)
+                    self.table.delete(*self.table.get_children())
+                    self.download['state'] = "active"
 
-                streams = yt.streams.filter(type="video", mime_type="video/mp4").order_by("resolution").desc()
-                for file in streams:
-                    self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+                    streams = yt.streams.filter(type="video", mime_type="video/mp4").order_by("resolution").desc()
+                    for file in streams:
+                        self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+                except Exception:
+                    return self.on_function_finish(
+                        "Error",
+                        "The program have a unexpected error",
+                        True
+                        )
+
+        return self.on_function_finish()
 
     def save_file(self, link, selected, option):
         itag = self.table.item(selected, 'text')
@@ -104,8 +153,13 @@ class Pytdownloader(tk.Tk):
         self.link.bind("<Button-1>", self.on_link_click)
         self.link.bind("<FocusOut>", self.on_link_focus_out)
 
-        self.search = tk.Button(self, width=14, text="Search", command=lambda: self.get_files(self.link.get(), self.option_download.get()))
+        self.search = tk.Button(self, width=14, text="Search", command= lambda:self.get_files(self.link.get(), self.option_download.get()))
         self.search.grid(row=0, column=3, pady=10, padx=10, sticky=W)
+        self.search.bind("<Button-1>", self.on_button_click)
+
+        self.advanced = tk.Button(self, width=14, text="Advanced search", command=lambda:self.get_advanced_files(self.link.get(), self.option_download.get()))
+        self.advanced.grid(row=1, column=3, padx=10, sticky=W+S+N)
+        self.advanced.bind("<Button-1>", self.on_button_click)
 
         # Options
         self.audio = tk.Radiobutton(self, text="Audio", variable=self.option_download, value=0)
@@ -113,9 +167,6 @@ class Pytdownloader(tk.Tk):
 
         self.video = tk.Radiobutton(self, text="Video", variable=self.option_download, value=1)
         self.video.grid(row=1, column=1, sticky=N)
-
-        self.advanced = tk.Button(self, width=14, text="Advanced search", command=lambda:self.get_advanced_files(self.link.get(), self.option_download.get()))
-        self.advanced.grid(row=1, column=3, padx=10, sticky=W+S+N)
 
         # Title
         self.ftitle = tk.Label(self, font=8, pady=10, textvariable=self.file_title)
@@ -155,6 +206,20 @@ class Pytdownloader(tk.Tk):
         self.table.delete(*self.table.get_children())
         self.download['state'] = "disabled"
 
+    def on_function_finish(self, title = "", message = "", error = False):
+        self.config(cursor='')
+        if error is True:
+            self.clean_query()
+            return messagebox.showerror(
+                title,
+                message
+            )
+        elif title != "" and message != "":
+            return messagebox.showinfo(
+                title,
+                message
+            )
+
     def on_link_click(self, event):
         self.link['state'] = "normal"
         if self.link.get() == "Enter your link":
@@ -166,4 +231,9 @@ class Pytdownloader(tk.Tk):
         self.link['state'] = "disabled"
 
     def on_return_click(self, event):
+        self.config(cursor='wait')
         self.get_files(self.link.get(), self.option_download.get())
+
+    def on_button_click(self, event):
+        self.config(cursor='wait')
+
