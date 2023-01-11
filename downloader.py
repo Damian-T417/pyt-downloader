@@ -158,10 +158,10 @@ class Pytdownloader(tk.Tk):
 
         table_scroll.config(command=self.table.yview)
 
-        self.table.column("#0",width=80, minwidth=80, anchor=CENTER, anchor=CENTER)
-        self.table.column("Type",width=80, minwidth=80, anchor=CENTER, anchor=CENTER)
-        self.table.column("Resolution",width=80, minwidth=80, anchor=CENTER, anchor=CENTER)
-        self.table.column("Codec", width=80, minwidth=80, anchor=CENTER, anchor=CENTER)
+        self.table.column("#0",width=80, minwidth=80, anchor=CENTER)
+        self.table.column("Type",width=80, minwidth=80, anchor=CENTER)
+        self.table.column("Resolution",width=80, minwidth=80, anchor=CENTER)
+        self.table.column("Codec", width=80, minwidth=80, anchor=CENTER)
 
         self.table.heading("#0", text="ID", anchor=CENTER)
         self.table.heading("Type", text="Type", anchor=CENTER)
