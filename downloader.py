@@ -1,5 +1,6 @@
 # Importing packages
 import tkinter as tk
+import urllib as ur
 
 from tkinter import ttk
 from tkinter import S, N, E, W
@@ -41,33 +42,17 @@ class Pytdownloader(tk.Tk):
         self.create_table()
 
     def get_files(self, link, option):
-        # Validations
-        if self.link.get() == "" or self.link.get() == "Enter your link":
-            return self.on_function_finish(
-                "Syntax info",
-                "Enter the link into the search bar",
-            )
 
+        conn = self.internet_connection()
+        yt = self.form_validation(link)
+        
+        # on_function_finish return "ok" in these validations, curious i thing
+        if yt == "ok" or conn == "ok":
+            return self.on_function_finish()
+
+        # Get the values
         try:
-            yt = YouTube(link)
-        except Exception:
-            return self.on_function_finish(
-                "Syntax error",
-                "The link is not supported or is misspelled",
-                True
-            )
-
-        if self.option_download.get() == 2:
-            return self.on_function_finish(
-                "Option info",
-                "Select one of the options below the search bar",
-            )
-
-        try:
-            self.file_title.set(yt.title)
-            self.file_link.set(link)
-            self.table.delete(*self.table.get_children())
-            self.download['state'] = "active"
+            self.prepare_query(link, yt.title)
 
             if option == 0:
                 stream = yt.streams.filter(type="audio", mime_type="audio/mp4").first()
@@ -86,27 +71,13 @@ class Pytdownloader(tk.Tk):
         return self.on_function_finish()
 
     def get_advanced_files(self, link, option):
-        # Validations
-        if self.link.get() == "" or self.link.get() == "Enter your link":
-            return self.on_function_finish(
-                "Syntax info",
-                "Enter the link into the search bar",
-            )
 
-        try:
-            yt = YouTube(link)
-        except Exception:
-            return self.on_function_finish(
-                "Syntax error",
-                "The link is not supported or is misspelled",
-                True
-            )
-
-        if self.option_download.get() == 2:
-            return self.on_function_finish(
-                "Option info",
-                "Select one of the options below the search bar",
-            )
+        conn = self.internet_connection()
+        yt = self.form_validation(link)
+        
+        # on_function_finish return "ok" in these validations, curious i thing
+        if yt == "ok" or conn == "ok":
+            return self.on_function_finish()
 
         if option == 0:
             audio = messagebox.askokcancel(
@@ -124,10 +95,7 @@ class Pytdownloader(tk.Tk):
             )
             if confirm is True:
                 try:
-                    self.file_link.set(link)
-                    self.file_title.set(yt.title)
-                    self.table.delete(*self.table.get_children())
-                    self.download['state'] = "active"
+                    self.prepare_query(link, yt.title)
 
                     streams = yt.streams.filter(type="video", mime_type="video/mp4").order_by("resolution").desc()
                     for file in streams:
@@ -206,12 +174,20 @@ class Pytdownloader(tk.Tk):
 
         self.table.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky=E+W+N+S)
 
+    # query helpers
     def clean_query(self):
         self.file_title.set("")
         self.link.delete(0, 'end')
         self.table.delete(*self.table.get_children())
         self.download['state'] = "disabled"
+    
+    def prepare_query(self, link, title):
+        self.file_link.set(link)
+        self.file_title.set(title)
+        self.table.delete(*self.table.get_children())
+        self.download['state'] = "active"
 
+    # Validations
     def on_function_finish(self, title = "", message = "", error = False):
         self.config(cursor='')
         if error is True:
@@ -225,6 +201,37 @@ class Pytdownloader(tk.Tk):
                 title,
                 message
             )
+
+    def internet_connection(self):
+        try:
+            ur.request.urlopen("https://www.youtube.com/", timeout=1)
+        except ur.error.URLError as err:
+            return self.on_function_finish(
+                "Connection lost",
+                "You lost the internet connection, try again later",
+                True
+            )
+
+    def form_validation(self, link):
+        if self.link.get() == "" or self.link.get() == "Enter your link":
+            return self.on_function_finish(
+                "Syntax info",
+                "Enter the link into the search bar",
+            )
+        try:
+            yt = YouTube(link)
+        except Exception:
+            return self.on_function_finish(
+                "Syntax error",
+                "The link is not supported or is misspelled",
+                True
+            )
+        if self.option_download.get() == 2:
+            return self.on_function_finish(
+                "Option info",
+                "Select one of the options below the search bar",
+            )
+        return yt
 
 # Events
     def on_link_click(self, event):
@@ -243,4 +250,3 @@ class Pytdownloader(tk.Tk):
 
     def on_button_click(self, event):
         self.config(cursor='wait')
-
