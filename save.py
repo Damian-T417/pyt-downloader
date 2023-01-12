@@ -32,23 +32,31 @@ class Savefile(tk.Toplevel):
         # Get the file
         try:
             self.yt = YouTube(link)
-            self.file = self.yt.streams.get_by_itag(itag)
         except Exception:
-            messagebox.showerror(
+            return self.on_function_finish(
                 "Error",
-                "The program have a unexpected error"
-                )
-            return self.destroy()
+                "The program have a unexpected error",
+                True
+            )
 
         # Set Variables
         self.file_title = tk.StringVar()
-        self.location = tk.StringVar()
         self.file_title.set(self.yt.title)
 
+        self.file = tk.StringVar()
+        if option == 0:
+            self.file.set(self.yt.title + ".mp3")
+        if option == 1:
+            self.file.set(self.yt.title + ".mp4")
+
+        self.location = tk.StringVar()
         # Get json data
         with open('data.json', 'r') as f:
             self.data = json.load(f)
             self.location.set(self.data['file_location'])
+
+        # Set a event when return or enter ir clicked
+        self.bind("<Return>", self.on_return_click)
 
         self.create_widgets()
         self.grab_set()
@@ -69,36 +77,53 @@ class Savefile(tk.Toplevel):
         return self.location.set(dir_path)
 
     def download_file(self):
-        # Get a audio for other options
+        if self.file_title != self.yt.title:
+            self.on_change_name()
+
+        # Check the file exist
+        if os.path.exists(self.location.get()+"/"+self.file.get()):
+            overwrite = messagebox.askokcancel(
+                'Alert',
+                'File already exists in this directory, overwrite?'
+            )
+            if not overwrite:
+                self.on_cancel()
+                return
+
+        # Get a stream video for audio and advanced search options
+        file = self.yt.streams.get_by_itag(self.itag)
         audio_video = self.yt.streams.filter(progressive=True).get_highest_resolution()
 
         # Audio option
         if self.option == 0:
-            out_file = audio_video.download(filename=self.file_title.get()+".mp4",output_path=self.location.get())
-            base, ext = os.path.splitext(out_file)
+            out_file = audio_video.download(filename="audio_in_process.mp4",output_path=self.location.get())
 
             new_file = mp.VideoFileClip(out_file)
-            new_file.audio.write_audiofile(base + ".mp3")
+            new_file.audio.write_audiofile(self.file.get())
 
             new_file.close()
             os.remove(out_file)
+            shutil.move(self.file.get(), self.location.get())
 
         # Video option
         if self.option == 1:
-            out_file = self.file.download(filename=self.file_title.get()+".mp4",output_path=self.location.get())
+            out_file = file.download(filename=self.file.get(),output_path=self.location.get())
 
         # Advanced search
-        if self.file.is_progressive == False and self.file.mime_type == "video/mp4":
+        if file.is_progressive == False and file.mime_type == "video/mp4":
             confirm = messagebox.askokcancel(
                 "Alert",
                 "This video doesn't contain audio, PytDownloader can add the audio in the video "+
                 "but the process take a long moment to complete depending of the quality of the " +
-                "video and the duration. This process will take a some resouces of your computer " +
-                "for the process. Continue?"
+                "video and the duration. This process will take a some resouces of your computer. " +
+                "Continue?"
             )
-            if confirm == True:
-                base, ext = os.path.splitext(out_file)
+            if not confirm:
+                os.remove(out_file)
+                self.on_cancel()
+                return self.on_function_finish()
 
+            try:
                 # Generate audio
                 audio_file = audio_video.download(filename="audio_file.mp4")
                 mp.VideoFileClip(audio_file).audio.write_audiofile("audio_file.mp3")
@@ -110,25 +135,27 @@ class Savefile(tk.Toplevel):
 
                 new_audio = mp.CompositeAudioClip([audio])
                 new_video.audio = new_audio
-                new_video.write_videofile(self.file_title.get() + '.mp4')
+                new_video.write_videofile(self.file.get())
                 time.sleep(1)
 
                 new_video.close()
-                audio.close()
                 os.remove(out_file)
                 os.remove('audio_file.mp3')
-                shutil.move(self.file_title.get() + '.mp4', self.location.get())
-            else:
+                audio.close()
+                shutil.move(self.file.get(), self.location.get())
+            except Exception:
                 os.remove(out_file)
-                return self.destroy()
+                os.remove('audio_file.mp3')
+                return self.on_function_finish(
+                "Render error",
+                "Some has happen in the process of video, try again later",
+                True
+            )
 
-        messagebox.showinfo(
+        return self.on_function_finish(
             "Success",
-            self.file_title.get() + " has been successfully downloaded"
+            self.file.get() + " has been successfully downloaded"
         )
-
-        self.parent.clean_query()
-        return self.destroy()
 
     # Creation the graphic interface
     def create_widgets(self):
@@ -156,3 +183,41 @@ class Savefile(tk.Toplevel):
 
         self.save_button = tk.Button(self, text="Save", width=10, command=lambda: self.download_file())
         self.save_button.grid(row=2, column=2, pady=5, padx=10, sticky=W)
+        self.save_button.bind('<Button-1>', self.on_button_click)
+
+    # Validations
+    def on_function_finish(self, title = "", message = "", error = False):
+        self.config(cursor='')
+        self.title("Save File")
+        if error is True:
+            messagebox.showerror(
+                title,
+                message
+            )
+            return self.destroy()
+        elif title != "" and message != "":
+            messagebox.showinfo(
+                title,
+                message
+            )
+            self.parent.clean_query()
+        return self.destroy()
+
+    def on_cancel(self):
+        self.config(cursor='')
+    
+    def on_change_name(self):
+        if self.option == 0:
+            self.file.set(self.file_title.get() + ".mp3")
+        if self.option == 1:
+            self.file.set(self.file_title.get() + ".mp4")
+
+    # Events
+    def on_return_click(self, event):
+        self.config(cursor='wait')
+        self.title("Save File (Downloading)")
+        self.download_file()
+
+    def on_button_click(self, event):
+        self.config(cursor='wait')
+        self.title("Save File (Downloading)")

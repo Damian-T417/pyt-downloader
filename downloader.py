@@ -45,10 +45,14 @@ class Pytdownloader(tk.Tk):
         self.create_table()
 
     def get_files(self):
-        # on_function_finish return "ok" in these validations, curious i thing
+        # Check the connection
         conn = self.internet_connection()
+        if conn == "ok":
+            return self.on_function_finish()
+
+        # on_function_finish return "ok" in these validations, curious i thing
         yt = self.form_validation()
-        if yt == "ok" or conn == "ok":
+        if yt == "ok":
             return self.on_function_finish()
 
         # Get the values
@@ -70,11 +74,14 @@ class Pytdownloader(tk.Tk):
         return self.on_function_finish()
 
     def get_advanced_files(self):
+        # Check the connection
         conn = self.internet_connection()
+        if conn == "ok":
+            return self.on_function_finish()
+
+        # Notes: on_function_finish return "ok" in form_validation, it curious but functional i guess...
         yt = self.form_validation()
-        
-        # on_function_finish return "ok" in these validations, curious i thing
-        if yt == "ok" or conn == "ok":
+        if yt == "ok":
             return self.on_function_finish()
 
         if self.option_download.get() == 0:
@@ -207,7 +214,7 @@ class Pytdownloader(tk.Tk):
 
     def internet_connection(self):
         try:
-            ur.request.urlopen("https://www.youtube.com/", timeout=1)
+            ur.request.urlopen("https://www.youtube.com/", timeout=4)
         except ur.error.URLError as err:
             return self.on_function_finish(
                 "Connection lost",
