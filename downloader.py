@@ -50,7 +50,7 @@ class Pytdownloader(tk.Tk):
         if conn == "ok":
             return self.on_function_finish()
 
-        # on_function_finish return "ok" in these validations, curious i thing
+        # Notes: on_function_finish return "ok" in form_validation, it curious but functional i guess...
         yt = self.form_validation()
         if yt == "ok":
             return self.on_function_finish()
@@ -68,7 +68,7 @@ class Pytdownloader(tk.Tk):
         except Exception:
             return self.on_function_finish(
                 "Error",
-                "The program have a unexpected error",
+                "The program have a unexpected error, try again.",
                 True
                 )
         return self.on_function_finish()
@@ -107,7 +107,7 @@ class Pytdownloader(tk.Tk):
                 except Exception:
                     return self.on_function_finish(
                         "Error",
-                        "The program have a unexpected error",
+                        "The program have a unexpected error, try again.",
                         True
                         )
         return self.on_function_finish()

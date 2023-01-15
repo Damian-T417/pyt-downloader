@@ -147,8 +147,8 @@ class Savefile(tk.Toplevel):
                 os.remove(out_file)
                 os.remove('audio_file.mp3')
                 return self.on_function_finish(
-                "Render error",
-                "Some has happen in the process of video, try again later",
+                "Conversion error",
+                "Something has happened in the conversion process, please try again later",
                 True
             )
 

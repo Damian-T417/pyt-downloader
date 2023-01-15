@@ -26,7 +26,8 @@ if __name__ == "__main__":
     if connection is False:
         messagebox.showerror(
             "Connection error",
-            "You need internet to use PytDownloader, try later with internet connection"
+            "You need internet to use PytDownloader, or maybe your connection is so slow. " +
+            "If this is the case, PytDownloader won't work properly."
         )
 
     with open('data.json', 'r') as f:
