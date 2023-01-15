@@ -29,6 +29,10 @@ class Savefile(tk.Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=4)
 
+        x = parent.winfo_x()
+        y = parent.winfo_y()
+        self.geometry("+%d+%d" %(x+50,y+150))
+
         # Get the file
         try:
             self.yt = YouTube(link)
@@ -59,6 +63,7 @@ class Savefile(tk.Toplevel):
         self.bind("<Return>", self.on_return_click)
 
         self.create_widgets()
+        self.wm_transient(parent)
         self.grab_set()
         self.focus_set()
 

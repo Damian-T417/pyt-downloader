@@ -25,6 +25,9 @@ class Pytdownloader(tk.Tk):
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(1, weight=2)
 
+        # Posible solution to center the main window??
+        self.geometry("+%d+%d" %(400,175))
+
         # Set global variables
         self.file_title = tk.StringVar()
         self.file_title.set("")
