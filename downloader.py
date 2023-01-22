@@ -26,7 +26,7 @@ class Pytdownloader(tk.Tk):
         self.grid_rowconfigure(1, weight=2)
 
         # Posible solution to center the main window??
-        self.geometry("+%d+%d" %(400,175))
+        self.geometry("+%d+%d" % (400, 175))
 
         # Set global variables
         self.file_title = tk.StringVar()
@@ -53,7 +53,8 @@ class Pytdownloader(tk.Tk):
         if conn == "ok":
             return self.on_function_finish()
 
-        # Notes: on_function_finish return "ok" in form_validation, it curious but functional i guess...
+        '''Notes: on_function_finish return "ok" in form_validation,
+            it curious but functional i guess...'''
         yt = self.form_validation()
         if yt == "ok":
             return self.on_function_finish()
@@ -62,12 +63,28 @@ class Pytdownloader(tk.Tk):
         try:
             self.prepare_query(yt.title)
             if self.option_download.get() == 0:
-                stream = yt.streams.filter(type="audio", mime_type="audio/mp4").first()
-                self.table.insert("",END,text=stream.itag, values=("audio/mp3", stream.resolution, stream.codecs))
+                stream = yt.streams.filter(
+                    type="audio",
+                    mime_type="audio/mp4"
+                    ).first()
+                self.table.insert(
+                    "",
+                    END,
+                    text=stream.itag,
+                    values=("audio/mp3", stream.resolution, stream.codecs)
+                    )
             elif self.option_download.get() == 1:
-                streams = yt.streams.filter(type="video", progressive=True).order_by("resolution").desc()
-                for file in streams:
-                    self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+                streams = yt.streams.filter(
+                    type="video",
+                    progressive=True
+                    ).order_by("resolution").desc()
+                for f in streams:
+                    self.table.insert(
+                        "",
+                        END,
+                        text=f.itag,
+                        values=(f.mime_type, f.resolution, f.codecs)
+                        )
         except Exception:
             return self.on_function_finish(
                 "Error",
@@ -82,7 +99,8 @@ class Pytdownloader(tk.Tk):
         if conn == "ok":
             return self.on_function_finish()
 
-        # Notes: on_function_finish return "ok" in form_validation, it curious but functional i guess...
+        '''Notes: on_function_finish return "ok" in form_validation,
+            it curious but functional i guess...'''
         yt = self.form_validation()
         if yt == "ok":
             return self.on_function_finish()
@@ -90,7 +108,8 @@ class Pytdownloader(tk.Tk):
         if self.option_download.get() == 0:
             audio = messagebox.askokcancel(
                 "Search error",
-                "Audio haven't more options that mp3, do you want to do a normal search?"
+                "Audio haven't more options that mp3, " +
+                "do you want to do a normal search?"
             )
             if audio is True:
                 return self.get_files()
@@ -98,15 +117,25 @@ class Pytdownloader(tk.Tk):
         if self.option_download.get() == 1:
             confirm = messagebox.askokcancel(
                 "Alert",
-                "Do you what to search more videos in diferent codecs and resolutions?" +
-                " (Some videos can't work on diferent devices or not have audio)"
+                "Do you what to search more videos in diferent " +
+                "codecs and resolutions? " +
+                "(Some videos can't work on diferent " +
+                "devices or not have audio)"
             )
             if confirm is True:
                 try:
                     self.prepare_query(yt.title)
-                    streams = yt.streams.filter(type="video", mime_type="video/mp4").order_by("resolution").desc()
-                    for file in streams:
-                        self.table.insert("",END,text=file.itag, values=(file.mime_type, file.resolution, file.codecs))
+                    streams = yt.streams.filter(
+                        type="video",
+                        mime_type="video/mp4"
+                        ).order_by("resolution").desc()
+                    for f in streams:
+                        self.table.insert(
+                            "",
+                            END,
+                            text=f.itag,
+                            values=(f.mime_type, f.resolution, f.codecs)
+                            )
                 except Exception:
                     return self.on_function_finish(
                         "Error",
@@ -128,34 +157,103 @@ class Pytdownloader(tk.Tk):
     def create_widgets(self):
         # Search bar
         self.link = tk.Entry(self)
-        self.link.grid(row=0, column=0, pady=10, padx=10, columnspan=3, sticky=W+E)
+        self.link.grid(
+            row=0,
+            column=0,
+            pady=10,
+            padx=10,
+            columnspan=3,
+            sticky=W + E
+            )
         self.link.insert(0, "Enter your link")
         self.link['state'] = "disabled"
         self.link.bind("<Button-1>", self.on_link_click)
         self.link.bind("<FocusOut>", self.on_link_focus_out)
 
-        self.search = tk.Button(self, width=14, text="Search", command= lambda:self.get_files())
-        self.search.grid(row=0, column=3, pady=10, padx=10, sticky=W)
+        self.search = tk.Button(
+            self,
+            width=14,
+            text="Search",
+            command=lambda: self.get_files()
+            )
+        self.search.grid(
+            row=0,
+            column=3,
+            pady=10,
+            padx=10,
+            sticky=W
+            )
         self.search.bind("<Button-1>", self.on_button_click)
 
-        self.advanced = tk.Button(self, width=14, text="Advanced search", command=lambda:self.get_advanced_files())
-        self.advanced.grid(row=1, column=3, padx=10, sticky=W+S+N)
+        self.advanced = tk.Button(
+            self,
+            width=14,
+            text="Advanced search",
+            command=lambda: self.get_advanced_files()
+            )
+        self.advanced.grid(
+            row=1,
+            column=3,
+            padx=10,
+            sticky=W + S + N
+            )
         self.advanced.bind("<Button-1>", self.on_button_click)
 
         # Options
-        self.audio = tk.Radiobutton(self, text="Audio", variable=self.option_download, value=0)
-        self.audio.grid(row=1, column=0, sticky=E+N)
+        self.audio = tk.Radiobutton(
+            self,
+            text="Audio",
+            variable=self.option_download,
+            value=0
+            )
+        self.audio.grid(
+            row=1,
+            column=0,
+            sticky=E + N
+            )
 
-        self.video = tk.Radiobutton(self, text="Video", variable=self.option_download, value=1)
-        self.video.grid(row=1, column=1, sticky=N)
+        self.video = tk.Radiobutton(
+            self,
+            text="Video",
+            variable=self.option_download,
+            value=1
+            )
+        self.video.grid(
+            row=1,
+            column=1,
+            sticky=N
+            )
 
         # Title
-        self.ftitle = tk.Label(self, font=8, pady=10, textvariable=self.file_title)
-        self.ftitle.grid(row=2, column=0, columnspan=4, padx=10, sticky=S)
+        self.ftitle = tk.Label(
+            self,
+            font=8,
+            pady=10,
+            textvariable=self.file_title
+            )
+        self.ftitle.grid(
+            row=2,
+            column=0,
+            columnspan=4,
+            padx=10,
+            sticky=S
+            )
 
-        #Download button
-        self.download = tk.Button(self, text="Download", state="disabled", command=lambda:self.save_file())
-        self.download.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky=W+E)
+        # Download button
+        self.download = tk.Button(
+            self,
+            text="Download",
+            state="disabled",
+            command=lambda: self.save_file()
+            )
+        self.download.grid(
+            row=4,
+            column=0,
+            columnspan=3,
+            padx=10,
+            pady=10,
+            sticky=W + E
+            )
 
     def create_table(self):
         # Table
@@ -168,9 +266,9 @@ class Pytdownloader(tk.Tk):
 
         table_scroll.config(command=self.table.yview)
 
-        self.table.column("#0",width=80, minwidth=80, anchor=CENTER)
-        self.table.column("Type",width=80, minwidth=80, anchor=CENTER)
-        self.table.column("Resolution",width=80, minwidth=80, anchor=CENTER)
+        self.table.column("#0", width=80, minwidth=80, anchor=CENTER)
+        self.table.column("Type", width=80, minwidth=80, anchor=CENTER)
+        self.table.column("Resolution", width=80, minwidth=80, anchor=CENTER)
         self.table.column("Codec", width=80, minwidth=80, anchor=CENTER)
 
         self.table.heading("#0", text="ID", anchor=CENTER)
@@ -178,7 +276,14 @@ class Pytdownloader(tk.Tk):
         self.table.heading("Resolution", text="Resolution", anchor=CENTER)
         self.table.heading("Codec", text="Codec", anchor=CENTER)
 
-        self.table.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky=E+W+N+S)
+        self.table.grid(
+            row=3,
+            column=0,
+            columnspan=3,
+            padx=10,
+            pady=10,
+            sticky=E + W + N + S
+            )
 
     # query helpers
     def clean_query(self):
@@ -192,7 +297,7 @@ class Pytdownloader(tk.Tk):
         self.table.delete(*self.table.get_children())
         self.link['state'] = "disabled"
         self.download['state'] = "disabled"
-    
+
     def prepare_query(self, title):
         self.file_title.set(title)
         self.file_link.set(self.link.get())
@@ -201,7 +306,7 @@ class Pytdownloader(tk.Tk):
         self.download['state'] = "active"
 
     # Validations
-    def on_function_finish(self, title = "", message = "", error = False):
+    def on_function_finish(self, title="", message="", error=False):
         self.config(cursor='')
         if error is True:
             self.clean_query()
@@ -218,7 +323,7 @@ class Pytdownloader(tk.Tk):
     def internet_connection(self):
         try:
             ur.request.urlopen("https://www.youtube.com/", timeout=4)
-        except ur.error.URLError as err:
+        except ur.error.URLError:
             return self.on_function_finish(
                 "Connection lost",
                 "You lost the internet connection, try again later",

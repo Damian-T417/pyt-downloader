@@ -13,12 +13,14 @@ if not os.path.exists('data.json'):
     with open('data.json', 'w') as f:
         json.dump(new_data, f, indent=4, sort_keys=True)
 
+
 def internet_connection():
     try:
         ur.request.urlopen('https://www.youtube.com/', timeout=1)
         return True
-    except ur.error.URLError as err: 
+    except ur.error.URLError:
         return False
+
 
 if __name__ == "__main__":
 
@@ -26,7 +28,8 @@ if __name__ == "__main__":
     if connection is False:
         messagebox.showerror(
             "Connection error",
-            "You need internet to use PytDownloader, or maybe your connection is so slow. " +
+            "You need internet to use PytDownloader, " +
+            "or maybe your connection is so slow. " +
             "If this is the case, PytDownloader won't work properly."
         )
 
@@ -38,8 +41,10 @@ if __name__ == "__main__":
     if data['show_welcome'] == 1:
         messagebox.showinfo(
             "Welcome!",
-            "Welcome to Pyt-downloader, put a youtube link in the first entry and push"+
-            " search to find your audio/video in diferent quality and download, "+
+            "Welcome to Pyt-downloader, " +
+            "put a youtube link in the first entry and push" +
+            " search to find your audio/video in " +
+            "diferent quality and download, " +
             "try in advanced search to more if you need a more options."
         )
         data['show_welcome'] = 0
