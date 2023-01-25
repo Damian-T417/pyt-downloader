@@ -95,6 +95,8 @@ class Savefile(tk.Toplevel):
             if not overwrite:
                 self.on_cancel()
                 return
+            if overwrite:
+                os.remove(self.location.get()+"/"+self.file.get())
 
         # Get a stream video for audio and advanced search options
         file = self.yt.streams.get_by_itag(self.itag)
