@@ -19,7 +19,7 @@ class Pytdownloader(tk.Tk):
         # Configuring the window and grid
         self.title("Pyt-downloader")
         self.geometry("500x415")
-        # Only in production mode add _internal in the path
+        # Only in production mode add _internal/ in the path
         self.iconbitmap("favicon.ico")
         self.resizable(False, False)
         self.grid_columnconfigure(0, weight=1)
@@ -366,7 +366,7 @@ class Pytdownloader(tk.Tk):
 
     def on_return_click(self, event):
         self.config(cursor='wait')
-        self.get_files(self.link.get(), self.option_download.get())
+        self.get_files()
 
     def on_button_click(self, event):
         self.config(cursor='wait')
