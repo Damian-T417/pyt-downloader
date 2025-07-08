@@ -7,7 +7,7 @@ from tkinter import S, N, E, W
 from tkinter import CENTER
 from tkinter import END
 from tkinter import messagebox
-from pytube import YouTube
+from pytubefix import YouTube
 from save import Savefile
 
 

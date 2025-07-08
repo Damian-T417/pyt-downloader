@@ -7,7 +7,7 @@ import shutil
 import tkinter as tk
 import moviepy.editor as mp
 
-from pytube import YouTube
+from pytubefix import YouTube
 from tkinter import N, E, W
 from tkinter import messagebox
 from tkinter import filedialog
